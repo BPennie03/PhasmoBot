@@ -17,7 +17,7 @@ class commands(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    fandom.set_wiki('Phasmophobia')
+    fandom.set_wiki("Phasmophobia")
 
     @commands.command(name='sync')
     async def sync(self, ctx):
@@ -27,20 +27,22 @@ class commands(commands.Cog):
 
     @app_commands.command(description="Lists the evidence required for a specific ghost")
     async def ghostevidence(self, interaction: discord.Interaction, ghost_type: str):
+        await interaction.response.defer()
         for ghost in ghost_list:
             if ghost_type.lower() == ghost.lower():
                 page = fandom.page(ghost)
-                await interaction.response.send_message(page.section("Evidence"))
+                await interaction.followup.send(page.section("Evidence"))
                 return
 
-        await interaction.response.send_message("Not a valid ghost type")
+        await interaction.followup.send("Not a valid ghost type")
 
     @app_commands.command(description="Gives important info regarding a specific Cursed Possession")
     async def cursed(self, interaction: discord.Interaction, cursed_poss: str):
+        await interaction.response.defer()
         for item in cursed_poss_list:
             if cursed_poss.lower() == item.lower():
                 page = fandom.page(item)
-                await interaction.response.send_message(page.section("Mechanics"))
+                await interaction.followup.send(page.section("Mechanics"))
                 return
         
         await interaction.response.send_message("Not a valid Cursed Possession")
@@ -51,6 +53,7 @@ class commands(commands.Cog):
 
     @app_commands.command(description="Finds possible ghosts based on given evidence")
     async def possibleghosts(self, interaction: discord.Interaction, evidence: str):
+        await interaction.response.defer()
         if evidence not in evidence_list:
             await interaction.response.send_message("Invalid or Incorrect evidence", ephemeral=True)
             return
@@ -62,7 +65,7 @@ class commands(commands.Cog):
             if item in ghost_list:
                 possible_ghosts += item + "\n"
 
-        await interaction.response.send_message(possible_ghosts)
+        await interaction.followup.send(possible_ghosts)
 
     # @app_commands.command(description="Display the rewards for 3 star ghost photos")
     # def photos(self, interaction: discord.Interaction):

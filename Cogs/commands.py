@@ -6,12 +6,17 @@ from discord import app_commands
 
 import fandom
 
-ghost_list = ["Banshee", "Demon", "Deogen", "Goryo", "Hantu", "Jinn", "Mare", "Moroi", "Myling", "Obake", "Oni", "Onryo", "Phantom", "Poltergeist", "Raiju", "Revenant", "Shade", "Spirit", "Thaye", "The Mimic", "The Twins", "Wraith", "Yokai", "Yurei"]
-cursed_poss_list = ["Haunted Mirror", "Monkey Paw", "Music Box", "Ouija Board", "Summoning Circle", "Tarot Cards", "Voodoo Doll"]
-evidence_list = ["D.O.T.S Projector", "EMF Level 5", "Fingerprints", "Freezing Temperatures", "Ghost Orb", "Ghost Writing", "Spirit Box"]
+ghost_list = ["Banshee", "Demon", "Deogen", "Goryo", "Hantu", "Jinn", "Mare", "Moroi", "Myling", "Obake", "Oni", "Onryo",
+              "Phantom", "Poltergeist", "Raiju", "Revenant", "Shade", "Spirit", "Thaye", "The Mimic", "The Twins", "Wraith", "Yokai", "Yurei"]
+cursed_poss_list = ["Haunted Mirror", "Monkey Paw", "Music Box",
+                    "Ouija Board", "Summoning Circle", "Tarot Cards", "Voodoo Doll"]
+evidence_list = ["D.O.T.S Projector", "EMF Level 5", "Fingerprints",
+                 "Freezing Temperatures", "Ghost Orb", "Ghost Writing", "Spirit Box"]
+
 
 async def setup(bot: commands.Bot):
     await bot.add_cog(commands(bot))
+
 
 class commands(commands.Cog):
     def __init__(self, bot):
@@ -28,13 +33,23 @@ class commands(commands.Cog):
     @app_commands.command(description="Lists the evidence required for a specific ghost")
     async def ghostevidence(self, interaction: discord.Interaction, ghost_type: str):
         await interaction.response.defer()
-        for ghost in ghost_list:
-            if ghost_type.lower() == ghost.lower():
-                page = fandom.page(ghost)
-                await interaction.followup.send(page.section("Evidence"))
-                return
 
-        await interaction.followup.send("Not a valid ghost type")
+        if ghost_type not in ghost_list:
+            await interaction.followup.send(f"Incorrect or invalid ghost type: \"{ghost_type}\"", ephemeral=True)
+            return
+
+        page = fandom.page(ghost_type)
+        ghost_evidence_list = page.section("Evidence").split("\n")
+
+        message = f"**{ghost_evidence_list[0]} for {ghost_type}: **\n"
+
+        for i in range(1, 4):
+            message += " > " + ghost_evidence_list[i] + "\n"
+
+        if len(ghost_evidence_list) == 5:
+            message += f"\n**Special {ghost_type} evidence:** {ghost_evidence_list[4]}"
+
+        await interaction.followup.send(message)
 
     @app_commands.command(description="Gives important info regarding a specific Cursed Possession")
     async def cursed(self, interaction: discord.Interaction, cursed_poss: str):
@@ -44,7 +59,7 @@ class commands(commands.Cog):
                 page = fandom.page(item)
                 await interaction.followup.send(page.section("Mechanics"))
                 return
-        
+
         await interaction.response.send_message("Not a valid Cursed Possession")
 
     @app_commands.command(description="Find the exact ghost type for your investigation!")
@@ -57,13 +72,13 @@ class commands(commands.Cog):
         if evidence not in evidence_list:
             await interaction.response.send_message("Invalid or Incorrect evidence", ephemeral=True)
             return
-        
+
         page = fandom.page(evidence)
         possible_list = page.section("Possible ghosts").split("\n")
         possible_ghosts = f"**Possible Ghosts with: {evidence}**\n"
         for item in possible_list:
             if item in ghost_list:
-                possible_ghosts += item + "\n"
+                possible_ghosts += " > " + item + "\n"
 
         await interaction.followup.send(possible_ghosts)
 

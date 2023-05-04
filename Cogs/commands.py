@@ -18,6 +18,17 @@ evidence_list = ["D.O.T.S Projector", "EMF Level 5", "Fingerprints",
 async def setup(bot: commands.Bot):
     await bot.add_cog(commands(bot))
 
+# Helper function for possibleghosts to trim possible_ghost list to only include ghosts
+
+
+def get_ghostlist(possible_list):
+    temp_list = []
+    for item in possible_list:
+        if item in ghost_list:
+            temp_list.append(item)
+    return temp_list
+
+
 class commands(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
@@ -80,29 +91,63 @@ class commands(commands.Cog):
     async def whatghost(self, interaction: discord.Interaction):
         await interaction.response.send_message("Its a Jinn!")
 
-    @app_commands.command(description="Finds possible ghosts based on given evidence")
-    async def possibleghosts(self, interaction: discord.Interaction, evidence: str):
+    @app_commands.command(description="Finds possible ghosts based on given evidence (must enter at least one evidence)")
+    async def possibleghosts(self, interaction: discord.Interaction, evidence_1: str, evidence_2: str = 'None', evidence_3: str = 'None'):
         await interaction.response.defer()
-        if evidence not in evidence_list:
-            await interaction.response.send_message("Invalid or Incorrect evidence", ephemeral=True)
-            return
 
         # Gets the page and section for the evidence and possible ghosts
-        page = fandom.page(evidence)
-        possible_list = page.section("Possible ghosts").split("\n")
+        page1 = fandom.page(evidence_1)
+        possible_list1 = get_ghostlist(
+            page1.section("Possible ghosts").split("\n"))
+        evidences_given = 1
+        possible_ghosts = []
 
-        # Output string that will be appended to
-        possible_ghosts = f"**Possible Ghosts with: {evidence}**\n"
+        # Output str that will be appended to
+        output = f"**Possible Ghosts with: {evidence_1}"
+
+        # If only 2 evidences are entered
+        if evidence_2 != 'None':
+            evidences_given += 1
+            page2 = fandom.page(evidence_2)
+            possible_list2 = get_ghostlist(
+                page2.section("Possible ghosts").split("\n"))
+
+            output += f", {evidence_2}"
+
+        if evidence_3 != 'None':
+            evidences_given += 1
+            page3 = fandom.page(evidence_3)
+            possible_list3 = get_ghostlist(
+                page3.section("Possible ghosts").split("\n"))
+
+            output += f", {evidence_3}"
+
+        output += ": **\n"
+
+        if evidences_given == 1:
+            possible_ghosts = possible_list1
+        elif evidences_given == 2:
+            possible_ghosts = set(possible_list1).intersection(possible_list2)
+        elif evidences_given == 3:
+            for ghost in ghost_list:
+                if ghost in possible_list1 and possible_list2 and possible_list3:
+                    possible_ghosts.append(ghost)
+                    break
 
         # For every item in the list, if the item is a ghost, append it to the output string
-        for item in possible_list:
-            if item in ghost_list:
-                possible_ghosts += " > " + item + "\n"
+        if len(possible_ghosts) == 0:
+            await interaction.followup.send("Erorr: No ghosts match those given evidences")
+        else:
+            print(possible_ghosts)
+            for ghost in possible_ghosts:
+                output += " > " + ghost + "\n"
+            await interaction.followup.send(output)
 
-        await interaction.followup.send(possible_ghosts)
+    # autocomplete functions for possibleghost command
 
-    # autocomplete function for possibleghost command
-    @possibleghosts.autocomplete("evidence")
+    @possibleghosts.autocomplete("evidence_1")
+    @possibleghosts.autocomplete("evidence_2")
+    @possibleghosts.autocomplete("evidence_3")
     async def possibleghost_autocompletion(self, interaction: discord.Interaction, current: str) -> list[app_commands.Choice[str]]:
         data = []
         choices = evidence_list

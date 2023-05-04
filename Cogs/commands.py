@@ -38,7 +38,6 @@ class commands(commands.Cog):
 
     @commands.command(name='sync')
     async def sync(self, ctx):
-        print("IT SYNCED IT SYNCED!")
         await self.bot.tree.sync()
         self.bot.tree.copy_global_to(guild=ctx.guild)
 
@@ -129,9 +128,6 @@ class commands(commands.Cog):
         elif evidences_given == 2:
             possible_ghosts = set(possible_list1).intersection(possible_list2)
         elif evidences_given == 3:
-            print(f"List 1: {possible_list1}\n")
-            print(f"List 2: {possible_list2}\n")
-            print(f"List 3: {possible_list3}\n")
             possible_ghosts = set(possible_list1).intersection(
                 set(possible_list2).intersection(possible_list3))
 
@@ -139,7 +135,6 @@ class commands(commands.Cog):
         if len(possible_ghosts) == 0:
             await interaction.followup.send("Erorr: No ghosts match those given evidences")
         else:
-            print(possible_ghosts)
             for ghost in possible_ghosts:
                 output += " > " + ghost + "\n"
             await interaction.followup.send(output)

@@ -1,4 +1,4 @@
-import os
+import random
 
 import discord
 from discord.ext import commands
@@ -58,7 +58,7 @@ class commands(commands.Cog):
 
         # Prints the ghosts evidence
         for i in range(1, 4):
-            message += " > " + ghost_evidence_list[i] + "\n"
+            message += f" > {ghost_evidence_list[i]}\n"
 
         # If this specific ghost has an extra slot for special evidence, print it
         if len(ghost_evidence_list) == 5:
@@ -89,7 +89,7 @@ class commands(commands.Cog):
 
     @app_commands.command(description="Find the exact ghost type for your investigation!")
     async def whatghost(self, interaction: discord.Interaction):
-        await interaction.response.send_message("Its a Jinn!")
+        await interaction.response.send_message(f"It's a {random.choice(ghost_list)} !")
 
     @app_commands.command(description="Finds possible ghosts based on given evidence (must enter at least one evidence)")
     async def possibleghosts(self, interaction: discord.Interaction, evidence_1: str, evidence_2: str = 'None', evidence_3: str = 'None'):
@@ -129,10 +129,11 @@ class commands(commands.Cog):
         elif evidences_given == 2:
             possible_ghosts = set(possible_list1).intersection(possible_list2)
         elif evidences_given == 3:
-            for ghost in ghost_list:
-                if ghost in possible_list1 and possible_list2 and possible_list3:
-                    possible_ghosts.append(ghost)
-                    break
+            print(f"List 1: {possible_list1}\n")
+            print(f"List 2: {possible_list2}\n")
+            print(f"List 3: {possible_list3}\n")
+            possible_ghosts = set(possible_list1).intersection(
+                set(possible_list2).intersection(possible_list3))
 
         # For every item in the list, if the item is a ghost, append it to the output string
         if len(possible_ghosts) == 0:
@@ -155,18 +156,3 @@ class commands(commands.Cog):
         for choice in choices:
             data.append(app_commands.Choice(name=choice, value=choice))
         return data
-
-    @app_commands.command(description="Display the rewards for 3 star ghost photos")
-    async def photos(self, interaction: discord.Interaction):
-        output = """```Ghost = $20
-                    Bone = $10
-                    Burned Crucifix = $10
-                    Dirty Water = $10
-                    Cursed Possession = $5
-                    Dead Body = $5
-                    D.O.T.S Ghost = $5
-                    Fingerprints = $5
-                    Footprints = $5
-                    Ghost Writing = $5
-                    Interaction = $5```"""
-        await interaction.response.send_message(output)

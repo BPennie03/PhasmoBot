@@ -25,13 +25,15 @@ Aside from ghosts you can also gather information on the cursed possessions and 
 ```python
 /cursed(cursed_poss) - #Gives short synopsis / use guide for a given cursed possession
 
-/smudge() - #Starts a 3-minute timer and will message/notify at 90s and 180s respectively, which is a good test for the Spirit
+/smudge() - #Starts a 3-minute timer and will message/notify at 90s and 180s respectively, 
+            #which is a good test for the Spirit
 
 /speed() - #Will display a table/chart showing all ghost speeds
 
 /hunt() - #Will display all ghosts and the sanity levels they respectively hunt at
 
-/ghost(ghost_type) - #Will give relevant information on ghost's and thier specific behaviors. ex: Jinn's cannot turn off the breaker, Banshee's make a special screeching sound in the parabolic mic, Mare's cannot turn on lights, etc.
+/ghost(ghost_type) - #Will give relevant information on ghost's and thier specific behaviors. 
+                     #ex: Jinn's cannot turn off the breaker, Mare's cannot turn on lights, etc.
 ```
 
 ## Contributions

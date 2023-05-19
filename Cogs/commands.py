@@ -2,6 +2,7 @@ import os
 import random
 import requests
 
+import asyncio
 import discord
 from discord.ext import commands
 from discord import app_commands
@@ -259,3 +260,33 @@ class commands(commands.Cog):
         for choice in choices:
             data.append(app_commands.Choice(name=choice, value=choice))
         return data
+
+    @app_commands.command(description="Starts a smudge timer")
+    async def smudge(self, interaction: discord.Interaction):
+        """Command to start a smudge timer
+        Starts a smudge timer and alerts at 60s, 90s, and 180s. 
+
+        Outputs:
+            A message at 60s, 90s, and 180s for when Demons, Normal Ghosts, and Spirits
+            can start hunts after a smudge stick as been used
+        """
+
+        await interaction.response.defer()
+
+        demon_duration = 5
+        normal_duration = 10
+        spirit_duration = 15
+
+        await interaction.channel.send(f"**Smudge timer has started for {spirit_duration} seconds**")
+
+        # Timer for Demons (60s)
+        await asyncio.sleep(demon_duration)
+        await interaction.channel.send(f"> {demon_duration} seconds have passed. Demons can now hunt")
+
+        # Timer for Normal Ghosts (90s)
+        await asyncio.sleep(normal_duration - demon_duration)
+        await interaction.channel.send(f"> {normal_duration} seconds have passed. Normal Ghosts can now hunt")
+
+        # Timer for Spirits (180s)
+        await asyncio.sleep(spirit_duration - normal_duration)
+        await interaction.channel.send(f"> {spirit_duration} seconds have passed. Spirit can now hunt")

@@ -1,4 +1,6 @@
+import os
 import random
+import requests
 
 import discord
 from discord.ext import commands
@@ -13,6 +15,8 @@ cursed_poss_list = ["Haunted Mirror", "Monkey Paw", "Music Box",
                     "Ouija Board", "Summoning Circle", "Tarot Cards", "Voodoo Doll"]
 evidence_list = ["D.O.T.S Projector", "EMF Level 5", "Fingerprints",
                  "Freezing Temperatures", "Ghost Orb", "Ghost Writing", "Spirit Box"]
+
+STEAM_API_KEY = os.getenv('STEAM_KEY')
 
 
 async def setup(bot: commands.Bot):
@@ -29,6 +33,17 @@ def get_ghostlist(possible_list):
     return temp_list
 
 
+def get_recent_news():
+    url = f'https://api.steampowered.com/ISteamNews/GetNewsForApp/v0002/?appid=739630&count=1&maxlength=100&format=json'
+    response = requests.get(url)
+    data = response.json()
+    if 'appnews' in data and 'newsitems' in data['appnews']:
+        news_items = data['appnews']['newsitems']
+        if len(news_items) > 0:
+            return news_items[0]
+    return None
+
+
 class commands(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
@@ -38,9 +53,26 @@ class commands(commands.Cog):
 
     @commands.command(name='sync')
     async def sync(self, ctx):
-        print("IT SYNCED IT SYNCED!")
         await self.bot.tree.sync()
         self.bot.tree.copy_global_to(guild=ctx.guild)
+        await ctx.send(f'All slash commands have been synced')
+
+    @app_commands.command(description="Get recent Phasmo news!")
+    async def news(self, interaction: discord.Interaction):
+        await interaction.response.defer()
+
+        news_item = get_recent_news()
+
+        if news_item is not None:
+            embed = discord.Embed(
+                title=news_item['title'], description=news_item['contents'], color=discord.Color.blurple())
+
+            if 'url' in news_item:
+                embed.url = news_item['url']
+        else:
+            print("No recent news update found.")
+
+        await interaction.followup.send(embed=embed)
 
     @app_commands.command(description="Lists the evidence required for a specific ghost")
     async def ghostevidence(self, interaction: discord.Interaction, ghost_type: str):
@@ -129,9 +161,6 @@ class commands(commands.Cog):
         elif evidences_given == 2:
             possible_ghosts = set(possible_list1).intersection(possible_list2)
         elif evidences_given == 3:
-            print(f"List 1: {possible_list1}\n")
-            print(f"List 2: {possible_list2}\n")
-            print(f"List 3: {possible_list3}\n")
             possible_ghosts = set(possible_list1).intersection(
                 set(possible_list2).intersection(possible_list3))
 
@@ -139,7 +168,6 @@ class commands(commands.Cog):
         if len(possible_ghosts) == 0:
             await interaction.followup.send("Erorr: No ghosts match those given evidences")
         else:
-            print(possible_ghosts)
             for ghost in possible_ghosts:
                 output += " > " + ghost + "\n"
             await interaction.followup.send(output)

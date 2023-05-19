@@ -25,7 +25,16 @@ async def setup(bot: commands.Bot):
 # Helper function for possibleghosts to trim possible_ghost list to only include ghosts
 
 
-def get_ghostlist(possible_list):
+def get_ghostlist(possible_list: list):
+    """Helper method for possibleghosts commnand
+
+    Args:
+        possible_list (list): list of possible ghosts
+
+    Outputs:
+        A new list of possilbe ghosts with correct Capitalization and spelling
+    """
+
     temp_list = []
     for item in possible_list:
         if item in ghost_list:
@@ -34,6 +43,13 @@ def get_ghostlist(possible_list):
 
 
 def get_recent_news():
+    """Helper method for news command
+    Uses the Steam Web API to get the most recent news item for a specified game (Phasmophobia)
+
+    Outputs:
+        Either the most recent news item, or None if there isn't one
+    """
+
     url = f'https://api.steampowered.com/ISteamNews/GetNewsForApp/v0002/?appid=739630&count=1&maxlength=100&format=json'
     response = requests.get(url)
     data = response.json()
@@ -59,6 +75,13 @@ class commands(commands.Cog):
 
     @app_commands.command(description="Get recent Phasmo news!")
     async def news(self, interaction: discord.Interaction):
+        """Command to get most recent Phasmo News
+        Calls the get_recent_news helper method and creates an embed from the returned information
+
+        Outputs:
+            A message embed containing a link to the news item
+        """
+
         await interaction.response.defer()
 
         news_item = get_recent_news()
@@ -76,6 +99,17 @@ class commands(commands.Cog):
 
     @app_commands.command(description="Lists the evidence required for a specific ghost")
     async def ghostevidence(self, interaction: discord.Interaction, ghost_type: str):
+        """Command to get evidence list of a specific ghost
+        Uses the fandom api to get specific page and sections to gather the evidence for a specific ghost, then 
+        returns it as a string message
+
+        Args:
+            ghost_type (str): The ghost type the user wishes to get the evidence for
+
+        Outputs:
+            A message containing the inputted ghost type and it's evidence
+        """
+
         await interaction.response.defer()
 
         if ghost_type not in ghost_list:
@@ -101,6 +135,17 @@ class commands(commands.Cog):
     # autocomplete function for ghostevidence command
     @ghostevidence.autocomplete("ghost_type")
     async def ghostevidence_autocompletion(self, interaction: discord.Interaction, current: str) -> list[app_commands.Choice[str]]:
+        """Autocomplete helper method for ghostevidence command
+        Uses a list of possible autocomplete options and updates the list based on what
+        the user is currently typing in
+
+        Args:
+            current (str): Current text that is being typed by the user
+
+        Outputs:
+            A data list containing possible autocomplete options
+        """
+
         data = []
         choices = ghost_list
 
@@ -121,10 +166,30 @@ class commands(commands.Cog):
 
     @app_commands.command(description="Find the exact ghost type for your investigation!")
     async def whatghost(self, interaction: discord.Interaction):
+        """Command to display what ghost you have
+        Grabs a random ghost from the list of all ghosts and displays the ghost type
+
+        Outputs:
+            A random ghost name and displays as a message
+        """
+
         await interaction.response.send_message(f"It's a {random.choice(ghost_list)} !")
 
     @app_commands.command(description="Finds possible ghosts based on given evidence (must enter at least one evidence)")
     async def possibleghosts(self, interaction: discord.Interaction, evidence_1: str, evidence_2: str = 'None', evidence_3: str = 'None'):
+        """Command to get list of possible ghost
+        Takes 1-3 evidence types from the user and creates a list of possible ghosts from those evidence types.
+        At least 1 evidence type is required, but the other 2 are optional
+
+        Args:
+            evidence_1 (str): string for a desired evidence type
+            evidence_2 (str)[optional]: string for a desired evidence type
+            evidence_3 (str)[optional]: string for a desired evidence type
+
+        Outputs:
+            A message containing a list of ghosts defined by the given evidence types
+        """
+
         await interaction.response.defer()
 
         # Gets the page and section for the evidence and possible ghosts
@@ -178,6 +243,16 @@ class commands(commands.Cog):
     @possibleghosts.autocomplete("evidence_2")
     @possibleghosts.autocomplete("evidence_3")
     async def possibleghost_autocompletion(self, interaction: discord.Interaction, current: str) -> list[app_commands.Choice[str]]:
+        """Autocomplete helper method for possibleghosts command
+        Uses a list of possible autocomplete options and updates the list based on what
+        the user is currently typing in. This one autocompletes for each of the 3 evidences
+
+        Args:
+            current (str): Current text that is being typed by the user
+
+        Outputs:
+            A data list containing possible autocomplete options
+        """
         data = []
         choices = evidence_list
 
